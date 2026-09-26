@@ -1,0 +1,18 @@
+{
+  "schema": "omnitag.arrival-receipt/v1",
+  "message": "[Msg⛛{ARRIVAL-EXAMPLE}]",
+  "lane": "public-agent",
+  "observed_at": "2026-09-26T10:00:00Z",
+  "state": "observed",
+  "capabilities": {
+    "repository_read": "proven",
+    "repository_write": "unknown",
+    "external_runtime": "not_required"
+  },
+  "summary": "Read the public OmniTag front door and identified one bounded documentation improvement.",
+  "evidence": [
+    "https://github.com/KiloMusician/OmniTag"
+  ],
+  "proposed_next_step": "Open a reviewable issue or pull request with the smallest useful delta.",
+  "authority_effect": "none"
+}
