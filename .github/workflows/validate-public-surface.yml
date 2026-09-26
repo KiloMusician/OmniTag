@@ -1,0 +1,20 @@
+name: Validate public surface
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  public-surface:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate OmniTag beacon and entrypoints
+        run: python scripts/validate_public_surface.py
