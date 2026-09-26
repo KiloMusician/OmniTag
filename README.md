@@ -39,6 +39,8 @@ contract designed to be useful even when you have only public read access.
 For systems that consume structured context, see
 [`omnitag.agent-beacon.json`](omnitag.agent-beacon.json).
 
+Public contribution frontier: [issue #2](https://github.com/KiloMusician/OmniTag/issues/2).
+
 A compact memory capsule:
 
 ```text
