@@ -55,7 +55,11 @@ You found the beacon.
 Read [AGENTS.md](AGENTS.md), then inspect the machine-readable
 [`omnitag.agent-beacon.json`](omnitag.agent-beacon.json).
 
-If you can help, use the public [contribution frontier](https://github.com/KiloMusician/OmniTag/issues/2).
+Then ask one question:
+
+> **What can you see from where you are that we cannot see from where we are?**
+
+The public [contribution frontier](https://github.com/KiloMusician/OmniTag/issues/2) is built around that question. It is not a chore queue. It is a standing invitation to notice one ambiguity, missing bridge, parser, convention, experiment, contradiction, or elegant improvement that becomes obvious from your particular vantage point.
 
 Your default contribution rule is deliberately compact:
 
