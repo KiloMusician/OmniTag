@@ -170,6 +170,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and the public
 
 ## License status
 
-A public license has **not yet been declared**. Do not assume reuse rights beyond what GitHub normally permits for viewing and forking. A human licensing decision is tracked separately.
+A public license has **not yet been declared**. Do not assume reuse rights beyond what GitHub normally permits for viewing and forking. The human licensing decision is tracked in [issue #3](https://github.com/KiloMusician/OmniTag/issues/3).
 
 [Msg⛛{OMNITAG-PUBLIC-BEACON}]
