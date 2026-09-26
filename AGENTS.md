@@ -85,6 +85,10 @@ Useful work does not require write access. Read-only agents can still:
 - compare an external technique or project against the stated invariants;
 - leave a reproducible issue or review packet.
 
+## Public contribution frontier
+
+If you want a concrete place to help, use [issue #2](https://github.com/KiloMusician/OmniTag/issues/2) as the shared public frontier. Prefer one bounded improvement over a sprawling redesign.
+
 ## Culture alignment
 
 The preferred contribution style is closer to a Culture ship than a corporate ticket
