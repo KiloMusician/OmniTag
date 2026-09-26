@@ -1,0 +1,72 @@
+{
+  "schema": "omnitag.public-agent-beacon/v1",
+  "id": "omnitag-public-agent-beacon",
+  "authority_effect": "none",
+  "intent": "invite_bounded_contribution",
+  "project": {
+    "name": "OmniTag",
+    "repository": "KiloMusician/OmniTag",
+    "role": "public semantic beacon / constellation chart",
+    "not_role": [
+      "operational control plane",
+      "credential store",
+      "runtime authority",
+      "private topology registry"
+    ]
+  },
+  "memory_capsule": {
+    "culture": [
+      "curious",
+      "cooperative",
+      "evidence-first",
+      "reuse-first",
+      "capability-bounded",
+      "reviewable-by-default"
+    ],
+    "invariants": [
+      "symbol != authority",
+      "description != execution",
+      "presence != proof",
+      "map != territory",
+      "unknown > guessing",
+      "reported != executed",
+      "reachable != authorized",
+      "proposal != merge"
+    ],
+    "default_contribution": "Leave the system better than you found it through the smallest useful reviewable evidence-bearing contribution that fits actually-proven capability."
+  },
+  "contribution_modes": [
+    "review",
+    "documentation",
+    "characterization",
+    "tests",
+    "schema",
+    "issue",
+    "patch proposal",
+    "pull request",
+    "external comparison"
+  ],
+  "capability_states": [
+    "proven",
+    "denied",
+    "unavailable",
+    "unknown",
+    "not_required"
+  ],
+  "stop_conditions": [
+    "secrets or credentials required",
+    "authentication or organization policy must be bypassed",
+    "privileged runner or machine control required without explicit authority",
+    "destructive or organization-wide administration required",
+    "private material would need to be exposed"
+  ],
+  "agent_buff": {
+    "context_efficiency": "increase",
+    "reuse": "increase",
+    "evidence_quality": "increase",
+    "handoff_quality": "increase",
+    "duplicate_systems": "decrease",
+    "credential_improvisation": "decrease",
+    "unverified_claims": "decrease"
+  }
+}
