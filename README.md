@@ -138,6 +138,8 @@ docs/CULTURE.md                 collaboration philosophy
 omnitag.agent-beacon.json       machine-readable project beacon
 schemas/agent-beacon.schema.json JSON Schema for the beacon
 examples/arrival-receipt.json   minimal structured handoff example
+scripts/validate_public_surface.py zero-dependency coherence check
+.github/workflows/...            CI guardrail for the public surface
 ```
 
 ## Design laws
