@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/KiloMusician/OmniTag/blob/main/schemas/agent-beacon.schema.json",
+  "title": "OmniTag Public Agent Beacon",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "authority_effect",
+    "intent",
+    "project",
+    "entrypoints",
+    "memory_capsule",
+    "protocol",
+    "contribution_modes",
+    "capability_states",
+    "stop_conditions",
+    "agent_buff",
+    "license_status"
+  ],
+  "properties": {
+    "schema": {"const": "omnitag.public-agent-beacon/v1"},
+    "id": {"type": "string", "minLength": 1},
+    "authority_effect": {"const": "none"},
+    "intent": {"const": "invite_bounded_contribution"},
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "repository", "visibility", "role", "not_role"],
+      "properties": {
+        "name": {"type": "string"},
+        "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+        "visibility": {"const": "public"},
+        "role": {"type": "string"},
+        "not_role": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true}
+      }
+    },
+    "entrypoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["human", "agent", "protocol", "contributing", "frontier", "schema", "example"],
+      "properties": {
+        "human": {"type": "string"},
+        "agent": {"type": "string"},
+        "protocol": {"type": "string"},
+        "contributing": {"type": "string"},
+        "frontier": {"type": "string", "format": "uri"},
+        "schema": {"type": "string"},
+        "example": {"type": "string"}
+      }
+    },
+    "memory_capsule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["culture", "invariants", "default_contribution"],
+      "properties": {
+        "culture": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "invariants": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "default_contribution": {"type": "string", "minLength": 1}
+      }
+    },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tag_shape", "message_example", "interoperability"],
+      "properties": {
+        "tag_shape": {"const": "[Tag⛛{Value}]"},
+        "message_example": {"type": "string"},
+        "interoperability": {"type": "string"}
+      }
+    },
+    "contribution_modes": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "capability_states": {
+      "type": "array",
+      "items": {"enum": ["proven", "denied", "unavailable", "unknown", "not_required"]},
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "agent_buff": {
+      "type": "object",
+      "additionalProperties": {"enum": ["increase", "decrease"]},
+      "minProperties": 1
+    },
+    "license_status": {"enum": ["not_declared"]}
+  }
+}

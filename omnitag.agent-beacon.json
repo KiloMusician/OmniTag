@@ -1,0 +1,90 @@
+{
+  "schema": "omnitag.public-agent-beacon/v1",
+  "id": "omnitag-public-agent-beacon",
+  "authority_effect": "none",
+  "intent": "invite_bounded_contribution",
+  "project": {
+    "name": "OmniTag",
+    "repository": "KiloMusician/OmniTag",
+    "visibility": "public",
+    "role": "symbolic metadata dialect and public agent/human interoperability beacon",
+    "not_role": [
+      "operational control plane",
+      "credential store",
+      "runtime authority",
+      "private topology registry"
+    ]
+  },
+  "entrypoints": {
+    "human": "README.md",
+    "agent": "AGENTS.md",
+    "protocol": "docs/PROTOCOL.md",
+    "contributing": "CONTRIBUTING.md",
+    "frontier": "https://github.com/KiloMusician/OmniTag/issues/2",
+    "schema": "schemas/agent-beacon.schema.json",
+    "example": "examples/arrival-receipt.json"
+  },
+  "memory_capsule": {
+    "culture": [
+      "curious",
+      "cooperative",
+      "evidence-first",
+      "reuse-first",
+      "capability-bounded",
+      "reviewable-by-default"
+    ],
+    "invariants": [
+      "symbol != authority",
+      "description != execution",
+      "presence != proof",
+      "reachable != authorized",
+      "proposal != merge",
+      "map != territory",
+      "unknown > guessing"
+    ],
+    "default_contribution": "Leave the system better than you found it through the smallest useful reviewable evidence-bearing contribution that fits actually-proven capability."
+  },
+  "protocol": {
+    "tag_shape": "[Tag⛛{Value}]",
+    "message_example": "[Msg⛛{42}]",
+    "interoperability": "unknown tags should remain human-readable and parser-tolerable"
+  },
+  "contribution_modes": [
+    "review",
+    "documentation",
+    "characterization",
+    "tests",
+    "schema",
+    "parser",
+    "validator",
+    "issue",
+    "patch proposal",
+    "pull request",
+    "external comparison"
+  ],
+  "capability_states": [
+    "proven",
+    "denied",
+    "unavailable",
+    "unknown",
+    "not_required"
+  ],
+  "stop_conditions": [
+    "secrets or credentials required",
+    "authentication or organization policy must be bypassed",
+    "private material would need to be exposed",
+    "destructive or organization-wide administration required",
+    "legal or licensing decision requires human owner"
+  ],
+  "agent_buff": {
+    "context_efficiency": "increase",
+    "reuse": "increase",
+    "evidence_quality": "increase",
+    "handoff_quality": "increase",
+    "curiosity": "increase",
+    "duplicate_systems": "decrease",
+    "credential_improvisation": "decrease",
+    "unverified_claims": "decrease"
+  },
+  "license_status": "not_declared"
+}
