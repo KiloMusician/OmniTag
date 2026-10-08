@@ -176,4 +176,8 @@ def run() -> int:
 
 if __name__ == "__main__":
     import sys
+    # Preserve Unicode input fixtures while making console diagnostics safe on
+    # Windows terminals whose output encoding cannot represent OmniTag glyphs.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(errors="backslashreplace")
     sys.exit(run())
