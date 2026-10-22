@@ -64,6 +64,18 @@ class GlyphArchiveTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "mismatch"):
                 glyph_archive.verify(source, manifest)
 
+    def test_reject_duplicate_manifest_object_keys(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source, manifest = root / "source.txt", root / "receipt.json"
+            source.write_bytes(self.raw)
+            glyph_archive.capture(source, manifest, "Msg-392", ["𓇯"])
+            data = manifest.read_text(encoding="utf-8")
+            data = data.replace('"format":', '"format": "malicious", "format":', 1)
+            manifest.write_text(data, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "duplicate manifest key"):
+                glyph_archive.verify(source, manifest)
+
     def test_invalid_unicode_and_invalid_refs(self):
         for raw in [b"\xff", b"\xed\xa0\x80"]:
             with self.assertRaises(UnicodeDecodeError):
@@ -107,7 +119,7 @@ class GlyphArchiveTests(unittest.TestCase):
             verify = subprocess.run([sys.executable, str(SOURCE), "verify", "--source", str(source),
                                      "--manifest", str(manifest)], capture_output=True, text=True)
             self.assertEqual(verify.returncode, 0, verify.stderr)
-            self.assertEqual(json.loads(verify.stdout)["status"], "verified")
+            self.assertEqual(json.loads(verify.stdout)["status"], "byte_integrity_verified")
 
     def test_byte_drift_even_when_normalization_matches(self):
         with tempfile.TemporaryDirectory() as temp:
