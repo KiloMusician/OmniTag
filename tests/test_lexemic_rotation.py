@@ -1,5 +1,7 @@
 """Stdlib-only characterization tests for experimental lexemic rotation."""
 import importlib.util
+import os
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -41,12 +43,29 @@ class UnicodeLedgerTests(unittest.TestCase):
         self.assertEqual(module.restore(annotated, ledger), original)
 
     def test_preserves_emoji_combining_and_paths(self):
-        original = "👩🏽‍🚀 Sashuric sashuric_module.py xSashuric Sashuric/Stem Sashuric\u0301 \u200d ΞΦ\nSashuric"
+        original = "👩🏽‍🚀 Sashuric sashuric_module.py Sashuric.py xSashuric Sashuric/Stem Sashuric\u0301 \u200d ΞΦ\nSashuric"
         annotated, ledger = module.annotate(original, ["Sashuric"])
         self.assertEqual(len(ledger), 2)
         self.assertIn("👩🏽‍🚀", annotated)
         self.assertIn("sashuric_module.py", annotated)
+        self.assertIn("Sashuric.py", annotated)
         self.assertEqual(module.restore(annotated, ledger), original)
+
+    def test_cross_process_doppelganger_confirmation(self):
+        # Historical Doppelgängers terminology means independently repeatable evidence.
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            src = root / "original.txt"
+            src.write_text(" ".join(["Sashuric"] * 40), encoding="utf-8")
+            variants = []
+            for n in (1, 7):
+                out, ledger = root / f"out{n}.txt", root / f"ledger{n}.json"
+                env = dict(os.environ, PYTHONHASHSEED=str(n))
+                subprocess.run([sys.executable, str(SOURCE), str(src), "--term", "Sashuric",
+                                "--output", str(out), "--ledger", str(ledger)],
+                               check=True, env=env, capture_output=True, text=True)
+                variants.append((out.read_bytes(), ledger.read_bytes()))
+            self.assertEqual(variants[0], variants[1])
 
     def test_no_undeclared_terms_changed(self):
         original = "Fractal Recursive Sashuric\nFractal"
