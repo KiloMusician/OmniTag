@@ -6,6 +6,7 @@ ledger are retained to permit a byte-for-byte Unicode round trip.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -126,10 +127,25 @@ def restore(annotated: str, events: Sequence[Event]) -> str:
     return "".join(pieces)
 
 
+def sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def load_ledger(ledger: Path) -> tuple[list[Event], str, str]:
+    """Load a versioned JSON receipt as typed events, with required hashes."""
+    doc = json.loads(ledger.read_text(encoding="utf-8"))
+    if doc.get("format") != "omnitag-lexemic-v1":
+        raise ValueError("unsupported ledger format")
+    events = [Event(**dict(raw, row=tuple(raw["row"]) if raw["row"] is not None else None))
+              for raw in doc["events"]]
+    return events, doc["source_sha256"], doc["annotated_sha256"]
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     cli = argparse.ArgumentParser(description=__doc__)
-    cli.add_argument("source", type=Path, help="UTF-8 source text")
-    cli.add_argument("--term", action="append", required=True, help="explicit lexeme to annotate")
+    cli.add_argument("source", type=Path, help="UTF-8 input text (original or annotated)")
+    cli.add_argument("--term", action="append", help="explicit lexeme to annotate")
+    cli.add_argument("--restore", action="store_true", help="restore original using the JSON ledger")
     cli.add_argument("--output", type=Path, required=True)
     cli.add_argument("--ledger", type=Path, required=True)
     args = cli.parse_args(argv)
@@ -139,14 +155,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         cli.error("output and ledger must be different files")
     with args.source.open("r", encoding="utf-8", newline="") as stream:
         original = stream.read()
-    result, events = annotate(original, args.term)
-    if restore(result, events) != original:
-        raise ValueError("round-trip verification failed")
-    args.output.write_text(result, encoding="utf-8", newline="")
-    args.ledger.write_text(json.dumps({"format": "omnitag-lexemic-v1", "terms": args.term,
-                                     "events": [asdict(e) for e in events]},
-                                    ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"annotated {len(events)} occurrences; UTF-8 bytes {len(original.encode('utf-8'))} -> {len(result.encode('utf-8'))}")
+    if args.restore:
+        if args.term:
+            cli.error("--restore does not accept --term")
+        events, source_digest, annotated_digest = load_ledger(args.ledger)
+        if sha256_text(original) != annotated_digest:
+            raise ValueError("annotated file hash does not match ledger")
+        restored = restore(original, events)
+        if sha256_text(restored) != source_digest:
+            raise ValueError("restored source hash does not match ledger")
+        args.output.write_text(restored, encoding="utf-8", newline="")
+        print(f"restored {len(events)} annotations; verified SHA-256")
+    else:
+        if not args.term:
+            cli.error("provide at least one --term for annotation")
+        result, events = annotate(original, args.term)
+        if restore(result, events) != original:
+            raise ValueError("round-trip verification failed")
+        args.output.write_text(result, encoding="utf-8", newline="")
+        args.ledger.write_text(json.dumps({"format": "omnitag-lexemic-v1", "terms": args.term,
+                                         "source_sha256": sha256_text(original),
+                                         "annotated_sha256": sha256_text(result),
+                                         "events": [asdict(e) for e in events]},
+                                        ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"annotated {len(events)} occurrences; UTF-8 bytes {len(original.encode('utf-8'))} -> {len(result.encode('utf-8'))}")
     return 0
 
 
