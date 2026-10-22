@@ -34,6 +34,8 @@ LITERAL_OPEN, LITERAL_CLOSE = "❰", "❱"
 NEST_OPEN,    NEST_CLOSE    = "⟦", "⟧"
 MEDIA_OUTER,  MEDIA_INNER   = "⦿", "⦾"
 DATA_LEAD     = "▲"
+# Keep nested ⟦...⟧ parsing below Python recursion limits even on hostile input.
+MAX_NEST_DEPTH = 64
 
 # ─── Errors ───────────────────────────────────────────────────────────────
 
@@ -122,17 +124,18 @@ def _atom_with_vs(s: str, i: int) -> str:
 # ─── Parser ───────────────────────────────────────────────────────────────
 
 def parse(s: str) -> Document:
+    if not isinstance(s, str):
+        raise TypeError("OmniTag input must be str")
     warnings = []
     if not unicodedata.is_normalized("NFC", s):
         warnings.append(Warning(
             "NON_CANONICAL_NFC", 0,
             "input is not NFC-normalized; canonical form will differ",
         ))
-    if not isinstance(s, str):
-        raise TypeError("OmniTag input must be str")
     if len(s) > 1_000_000:
         raise ParseError("INPUT_TOO_LARGE", 0, "input exceeds 1,000,000 characters")
-    elements, _ = _parse_sequence(s, 0)
+    starts: list[int] = []
+    elements, _ = _parse_sequence(s, 0, starts=starts)
     # Unknown symbolic connectors between structured elements are preserved,
     # never interpreted as commands. Do not warn for symbols in ordinary prose.
     positions = [i for i, e in enumerate(elements) if isinstance(e, RawAtom)]
@@ -141,15 +144,19 @@ def parse(s: str) -> Document:
                 unicodedata.category(elements[i].raw[0]).startswith("S") and
                 isinstance(elements[i-1], (Tag, Data, Media, Nested)) and
                 isinstance(elements[i+1], (Tag, Data, Media, Nested))):
-            warnings.append(Warning("UNKNOWN_CONNECTOR", sum(len(_ser(e)) for e in elements[:i]),
+            warnings.append(Warning("UNKNOWN_CONNECTOR", starts[i],
                                     "unrecognized glyph preserved; no execution effect"))
     return Document(elements=elements, warnings=warnings)
 
-def _parse_sequence(s: str, pos: int) -> tuple[list, int]:
+def _parse_sequence(
+    s: str, pos: int, *, nest_depth: int = 0, starts: Optional[list[int]] = None
+) -> tuple[list, int]:
     elements = []
     n = len(s)
     while pos < n:
-        el, new_pos = _parse_element(s, pos)
+        if starts is not None:
+            starts.append(pos)  # original input offset; NFC may shorten codepoint count
+        el, new_pos = _parse_element(s, pos, nest_depth)
         if new_pos <= pos:
             # safeguard: never allow a zero-width advance
             el = RawAtom(raw=_atom_with_vs(s, pos))
@@ -158,7 +165,7 @@ def _parse_sequence(s: str, pos: int) -> tuple[list, int]:
         pos = new_pos
     return elements, pos
 
-def _parse_element(s: str, i: int) -> tuple[Element, int]:
+def _parse_element(s: str, i: int, nest_depth: int = 0) -> tuple[Element, int]:
     n = len(s)
     if i >= n:
         return RawAtom(raw=""), i
@@ -173,6 +180,8 @@ def _parse_element(s: str, i: int) -> tuple[Element, int]:
 
     # 2. Nested ⟦...⟧
     if c == NEST_OPEN:
+        if nest_depth >= MAX_NEST_DEPTH:
+            raise ParseError("NESTING_TOO_DEEP", i, f"maximum nesting depth is {MAX_NEST_DEPTH}")
         d, j = 1, i + 1
         while j < n and d > 0:
             if s[j] == NEST_OPEN:
@@ -183,7 +192,7 @@ def _parse_element(s: str, i: int) -> tuple[Element, int]:
         if d > 0:
             raise ParseError("UNTERMINATED_NESTED", i, "nested opened but never closed")
         inner = s[i + 1:j - 1]
-        seq, _ = _parse_sequence(inner, 0)
+        seq, _ = _parse_sequence(inner, 0, nest_depth=nest_depth + 1)
         return Nested(sequence=seq), j
 
     # 3. Media ⦿⦾kind⦾⦿
