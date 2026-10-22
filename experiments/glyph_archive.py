@@ -83,12 +83,24 @@ def capture(source: Path, manifest: Path, source_ref: str, glyphs: list[str]) ->
     if manifest.exists():
         raise FileExistsError("manifest exists; create a new receipt rather than overwrite history")
     receipt = build_manifest(source.read_bytes(), source_ref, glyphs)
-    manifest.write_text(json.dumps(receipt, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    # Exclusive create is atomic even if two processes race after the existence check.
+    with manifest.open("x", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(receipt, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
     return receipt
 
 
+def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate manifest key: {key}")
+        result[key] = value
+    return result
+
+
 def verify(source: Path, manifest: Path) -> dict:
-    doc = json.loads(manifest.read_text(encoding="utf-8"))
+    doc = json.loads(manifest.read_text(encoding="utf-8"),
+                     object_pairs_hook=_reject_duplicate_keys)
     if not isinstance(doc, dict) or doc.get("format") != FORMAT:
         raise ValueError("unsupported manifest format")
     glyph_records = doc.get("tracked_glyphs")
@@ -121,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, UnicodeError, TypeError, KeyError, json.JSONDecodeError) as exc:
         print(f"glyph-archive: {exc}", file=sys.stderr)
         return 1
-    print(json.dumps({"status": "captured" if args.command == "capture" else "verified",
+    print(json.dumps({"status": "captured" if args.command == "capture" else "byte_integrity_verified",
                       "source_ref": result["source_ref"],
                       "sha256": result["source_sha256"],
                       "bytes": result["source_bytes"]}, sort_keys=True))
