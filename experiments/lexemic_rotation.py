@@ -43,6 +43,12 @@ def is_boundary(text: str, index: int) -> bool:
     if index < 0 or index >= len(text):
         return True
     c = text[index]
+    if c == ".":
+        # A dotted identifier/path is not prose; sentence-final punctuation is.
+        left = index > 0 and unicodedata.category(text[index - 1])[0] in "LN"
+        right = index + 1 < len(text) and unicodedata.category(text[index + 1])[0] in "LN"
+        if left and right:
+            return False
     return not (c == "_" or c in "/\\" or unicodedata.category(c)[0] in "LMN")
 
 
