@@ -7,7 +7,7 @@ OmniTag is the **public dialect** of the colony's tagging lineage (RSHT 2024 →
 ## Read first
 
 1. `docs/PROTOCOL.md` — the grammar. This is the specification; everything else is commentary.
-2. `agent-beacon.json` — how an agent announces itself in the dialect.
+2. `omnitag.agent-beacon.json` — the machine-readable public agent beacon (not an authentication or registration mechanism).
 3. The design laws, which are load-bearing, not slogans:
    - **symbol != authority** — a tag's presence grants nothing.
    - **presence != proof** — a claim stated is not a claim verified.
