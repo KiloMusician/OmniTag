@@ -1,6 +1,7 @@
 """Unittest adapter and adversarial verification for the proposed parser."""
 import unittest
 import unicodedata
+from unittest.mock import patch
 
 import omnitag
 from omnitag_tests import CASES
@@ -63,6 +64,38 @@ class OmniTagContract(unittest.TestCase):
                     self.assertNotEqual(omnitag.canonicalize(value), value)
         finally:
             omnitag._ser = orig
+
+
+    def test_unknown_connector_offsets_use_original_input_indices(self):
+        # NFC normalization changes codepoint length. Warnings locate input spans,
+        # not positions in the canonicalized output.
+        src = "cafe\u0301 [Msg⛛{1}]🜁[State⛛{OK}]"
+        doc = omnitag.parse(src)
+        warnings = [w for w in doc.warnings if w.code == "UNKNOWN_CONNECTOR"]
+        self.assertEqual(len(warnings), 1)
+        self.assertEqual(warnings[0].offset, src.index("🜁"))
+
+    def test_parse_does_not_serialize_every_warning_prefix(self):
+        # Regresses quadratic cost: 2000 unknown connectors between tags
+        # previously re-serialized all earlier elements for each warning.
+        src = "[Msg⛛{1}]🜁[State⛛{OK}]" * 2000
+        with patch.object(omnitag, "_ser", side_effect=AssertionError("parser re-serialized AST")):
+            doc = omnitag.parse(src)
+        self.assertEqual(len([w for w in doc.warnings if w.code == "UNKNOWN_CONNECTOR"]), 2000)
+
+    def test_extreme_nesting_returns_bounded_parse_error(self):
+        src = "⟦" * 900 + "[Msg⛛{1}]" + "⟧" * 900
+        with self.assertRaises(omnitag.ParseError) as cm:
+            omnitag.parse(src)
+        self.assertEqual(cm.exception.code, "NESTING_TOO_DEEP")
+
+    def test_modest_nesting_still_roundtrips(self):
+        src = "⟦" * 12 + "[Msg⛛{1}]" + "⟧" * 12
+        self.assertEqual(omnitag.canonicalize(src), src)
+
+    def test_non_string_input_has_explicit_type_error(self):
+        with self.assertRaisesRegex(TypeError, "must be str"):
+            omnitag.parse(None)
 
 
 if __name__ == '__main__':
