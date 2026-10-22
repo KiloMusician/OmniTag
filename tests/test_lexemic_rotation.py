@@ -60,6 +60,18 @@ class UnicodeLedgerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.restore(annotated.replace("₁", "₂"), ledger)
 
+    def test_cli_restore_and_detect_outside_span_tampering(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            src, out, ledger, restored = (root / n for n in ("src.txt", "out.txt", "ledger.json", "restored.txt"))
+            src.write_bytes("😀 Sashuric\r\nSashuric\n".encode())
+            module.main([str(src), "--term", "Sashuric", "--output", str(out), "--ledger", str(ledger)])
+            module.main([str(out), "--restore", "--output", str(restored), "--ledger", str(ledger)])
+            self.assertEqual(src.read_bytes(), restored.read_bytes())
+            out.write_bytes(b"X" + out.read_bytes())
+            with self.assertRaisesRegex(ValueError, "hash does not match"):
+                module.main([str(out), "--restore", "--output", str(restored), "--ledger", str(ledger)])
+
     def test_crlf_is_not_normalized_by_cli(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
