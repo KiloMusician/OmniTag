@@ -14,9 +14,23 @@ python -m unittest -v test_omnitag_contract.py
 python omnitag_bench.py --out /tmp/omnitag_bench_results.json
 ```
 
-The suite covers **18 test cases plus 2 meaningful mutation probes**, and 9 additional stdlib unit tests. The previous draft's mutation probe was invalid: it stripped U+FE0F (variation selector) and expected the family-emoji case to fail even though that case contains only U+200D (zero-width joiners). The corrected tests independently strip U+FE0F in the variation-selector case and U+200D in the family-emoji case. Both regressions are detected.
+The suite covers **18 test cases plus 2 meaningful mutation probes**, and 14 additional stdlib unit tests. The previous draft's mutation probe was invalid: it stripped U+FE0F (variation selector) and expected the family-emoji case to fail even though that case contains only U+200D (zero-width joiners). The corrected tests independently strip U+FE0F in the variation-selector case and U+200D in the family-emoji case. Both regressions are detected.
 
 Parser behavior: preserve unknown tags and raw glyphs; NFC canonicalization without compatibility folding; brace-balanced nested tag bodies such as `[Nest⛛{Outer:[State⛛{Observed}]}]`. `[Role⛛{ADMIN}]` is notation, not authority. **Limitations:** no full strict-mode validator, dictionary registry, signed proof model, executable OmniTag semantics or universal nested EBNF is claimed.
+
+## Parser hardening follow-up (2026-10-21)
+
+After review of this experiment's existing draft PR, two concrete reliability defects were fixed **in this same branch**, without changing the advertised OmniTag syntax:
+
+- `UNKNOWN_CONNECTOR` warnings now use original-input offsets captured during parsing, rather than repeatedly serializing all earlier AST elements (previously quadratic in the number of warnings). NFC normalization still happens only when serializing; offsets are for the original input.
+- `⟦...⟧` recursion is bounded at 64 nested containers. More deeply nested inputs raise `ParseError(code="NESTING_TOO_DEEP")`, rather than leaking a Python `RecursionError`.
+- Non-string input now produces the intended `TypeError` before NFC inspection.
+
+Five regression tests cover those behaviors, including 2,000 warning-bearing segments and 900 nested delimiters. The original 18-case corpus and 2 Unicode mutation checks remain unchanged.
+
+**Independent source-head witness:** isolated Linux checkout of commit `b658587a6394c2950252ec30554578a837da3bd4` on Python 3.14.4: `python3 -m unittest -v test_omnitag_contract.py` → 14 passed; `python3 omnitag_tests.py` → 18/18 cases and 2/2 mutation checks passed; `python3 scripts/validate_public_surface.py` → `status: ok`; `python3 -m compileall -q experiments/roundtrip` → exit 0. This is a runtime witness for the isolated experiment only, **not** a fleet health claim or a merge gate.
+
+**Terminology:** the parser preserves unknown glyphs and round-trips NFC input. Non-NFC input is intentionally canonicalized to NFC, so byte-for-byte or codepoint-for-codepoint "losslessness" is **not** claimed for arbitrary input.
 
 ## Measured tokenizer experiment
 
