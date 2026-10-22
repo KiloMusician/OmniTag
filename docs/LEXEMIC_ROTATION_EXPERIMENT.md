@@ -33,7 +33,7 @@ Doppelgängers in the source's terminology can be treated as a **confirmation ph
     python experiments/lexemic_rotation.py source.txt --term Sashuric --term Fractal --output annotated.txt --ledger rotation-ledger.json
     python experiments/lexemic_rotation.py annotated.txt --restore --output restored.txt --ledger rotation-ledger.json
 
-On restoration the CLI checks SHA-256 of both the entire annotated file and the reconstructed original against the versioned ledger, including text outside annotated spans. The tested procedure preserves original CRLF bytes. Input files must be UTF-8. The CLI refuses to overwrite its input and refuses to make the annotated file and ledger the same file. restore(annotated, events) checks that annotated spans still agree with the ledger before reconstructing the original string. Tests cover all four transforms, 40th-occurrence cycling, Unicode emoji/ZWJ and combining marks, file paths, unselected terms, tamper rejection, and CRLF retention.
+On restoration the CLI checks SHA-256 of both the entire annotated file and the reconstructed original against the versioned ledger, including text outside annotated spans. The tested procedure preserves original CRLF bytes. Input files must be UTF-8. The CLI refuses to overwrite its input and refuses to make the annotated file and ledger the same file. restore(annotated, events) checks that annotated spans still agree with the ledger before reconstructing the original string. Tests cover all four transforms, 40th-occurrence cycling, Unicode emoji/ZWJ and combining marks, slash/underscore/dotted path fragments, unselected terms, tamper rejection, and CRLF retention. Two fresh interpreter processes with distinct PYTHONHASHSEED values must yield identical annotated outputs and ledger bytes: a narrowly testable form of the historical Doppelgängers confirmation idea.
 
 ## Admission criteria for a future implementation
 
@@ -44,7 +44,7 @@ On restoration the CLI checks SHA-256 of both the entire annotated file and the 
 5. Record a reversible original-to-transformed ledger independent of rendition. Use hashes or durable references when integrating with StaticMemoryNodes and KiloEthereal vantage snapshots.
 6. Reconcile with experimental parser PR #5 and Unicode display PR #13 before admission into the canonical protocol. No new symbolic tag here grants permissions or trust.
 
-[State⛛{REVIEW_REQUIRED}] [Metric⛛{LOCAL_UNIT_TESTS:10}] [Ref⛛{HISTORICAL_SESSION}]
+[State⛛{REVIEW_REQUIRED}] [Metric⛛{LOCAL_UNIT_TESTS:11}] [Ref⛛{HISTORICAL_SESSION}]
 
 ## Session harvest: historical architecture mapped to testable contracts
 
