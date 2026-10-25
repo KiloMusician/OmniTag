@@ -44,7 +44,7 @@ python -m unittest discover -s tests -p 'test_glyph_codifiers.py' -v
 python scripts/validate_public_surface.py
 ```
 
-Test obligations: 12 deterministic stdlib tests cover uniqueness, collision rejection, bidi/surrogate/invisible-only surfaces, NFC/NFD distinction, ZWJ emoji, PUA, raw tags, longest match, span integrity, tamper detection, and empty input. Token savings, Unicode grapheme segmentation, display width, comprehension benefits, and real-world StockLens decoding have **not** been measured.
+Test obligations: 14 deterministic stdlib tests cover uniqueness, collision rejection, bidi/surrogate/invisible-only surfaces, NFC/NFD distinction, ZWJ emoji, PUA, raw tags, longest match, span integrity, tamper detection, and empty input. Token savings, Unicode grapheme segmentation, display width, comprehension benefits, and real-world StockLens decoding have **not** been measured.
 
 ## Next investigations
 
