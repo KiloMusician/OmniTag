@@ -81,6 +81,24 @@ class CodifierTests(unittest.TestCase):
         self.assertEqual(p["parts"], [])
         self.assertEqual(module.restore(p), "")
 
+    def test_literal_unicode_inspector(self):
+        source = "e\u0301 👩🏽‍🚀 ⟹"
+        report = module.inspect_unicode(source)
+        self.assertTrue(report["nfc_would_change"])
+        self.assertEqual(report["scalars"][1]["codepoint"], "U+0301")
+        self.assertEqual(report["scalars"][1]["combining_class"], 230)
+        self.assertIn("U+200D", [x["codepoint"] for x in report["scalars"]])
+        self.assertEqual(module.digest(source), report["source_sha256"])
+
+    def test_seeded_unicode_roundtrip_matrix(self):
+        import random
+        r = random.Random(20261025)
+        alphabet = ["Ξ", "⟹", "↠", "⧉", "∷", "↻", "◌", "\u0301", "é",
+                    "e", "👩", "🏽", "\u200d", "🚀", "\ue000", "𓂀", "\r", "\n", "A"]
+        for _ in range(256):
+            source = "".join(r.choices(alphabet, k=r.randrange(120)))
+            self.assertEqual(module.restore(module.encode(source)), source)
+
     def test_non_string(self):
         with self.assertRaises(TypeError):
             module.encode(None)
