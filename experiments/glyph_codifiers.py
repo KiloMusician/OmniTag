@@ -121,3 +121,25 @@ def gloss(packet, entries=REGISTRY):
     by_id = check_registry(entries)
     return "".join(by_id[p["id"]].fallback if p["kind"] == "glyph"
                    else p["text"] for p in packet["parts"])
+
+
+def inspect_unicode(source):
+    """Literal scalar inventory; never claim grapheme or linguistic identity.
+
+    This helps distinguish source bytes from rendered glyph appearance.
+    No normalization or interpretation is applied to the source.
+    """
+    if not isinstance(source, str):
+        raise TypeError("source must be a string")
+    return {
+        "source_sha256": digest(source),
+        "nfc_would_change": unicodedata.normalize("NFC", source) != source,
+        "nfd_would_change": unicodedata.normalize("NFD", source) != source,
+        "scalars": [
+            {"offset": i, "codepoint": f"U+{ord(c):04X}",
+             "name": unicodedata.name(c, "<unnamed>"),
+             "category": unicodedata.category(c),
+             "combining_class": unicodedata.combining(c)}
+            for i, c in enumerate(source)
+        ],
+    }
