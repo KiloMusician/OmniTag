@@ -1,4 +1,8 @@
 """Unittest adapter and adversarial verification for the proposed parser."""
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
 import unittest
 import unicodedata
 from unittest.mock import patch
@@ -92,6 +96,33 @@ class OmniTagContract(unittest.TestCase):
     def test_modest_nesting_still_roundtrips(self):
         src = "⟦" * 12 + "[Msg⛛{1}]" + "⟧" * 12
         self.assertEqual(omnitag.canonicalize(src), src)
+
+    def test_file_cli_requires_a_path(self):
+        run = subprocess.run([sys.executable, str(Path(omnitag.__file__)), "--file"],
+                             capture_output=True, text=True, timeout=10)
+        self.assertEqual(run.returncode, 2)
+        self.assertIn("usage: omnitag.py --file", run.stderr)
+        self.assertNotIn("Traceback", run.stderr)
+
+    def test_file_cli_rejects_oversize_without_unbounded_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "large.txt"
+            path.write_text("x" * 1_000_002, encoding="utf-8")
+            run = subprocess.run([sys.executable, str(Path(omnitag.__file__)),
+                                  "--file", str(path)],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(run.returncode, 1)
+        self.assertIn("INPUT_TOO_LARGE", run.stderr)
+
+    def test_file_cli_missing_input_fails_with_clean_diagnostic(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = Path(tmp) / "does-not-exist.txt"
+            run = subprocess.run([sys.executable, str(Path(omnitag.__file__)),
+                                  "--file", str(missing)],
+                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(run.returncode, 2)
+        self.assertIn("READ ERROR: FileNotFoundError", run.stderr)
+        self.assertNotIn("Traceback", run.stderr)
 
     def test_non_string_input_has_explicit_type_error(self):
         with self.assertRaisesRegex(TypeError, "must be str"):
