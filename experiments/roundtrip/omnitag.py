@@ -323,8 +323,18 @@ if __name__ == "__main__":
         print("   or: omnitag.py --file <path>", file=sys.stderr)
         sys.exit(2)
     if sys.argv[1] == "--file":
-        with open(sys.argv[2], "r", encoding="utf-8") as f:
-            src = f.read()
+        if len(sys.argv) != 3:
+            print("usage: omnitag.py --file <path>", file=sys.stderr)
+            sys.exit(2)
+        try:
+            # Apply the same 1,000,000-character cap BEFORE loading a large
+            # file in full. The extra character lets parse() issue its
+            # existing INPUT_TOO_LARGE error without a separate code path.
+            with open(sys.argv[2], "r", encoding="utf-8") as f:
+                src = f.read(1_000_001)
+        except (OSError, UnicodeError) as exc:
+            print(f"READ ERROR: {type(exc).__name__}", file=sys.stderr)
+            sys.exit(2)
     else:
         src = sys.argv[1]
     try:
