@@ -16,7 +16,7 @@ This guide complements [AGENTS.md](../AGENTS.md) and [the protocol primer](PROTO
 1. Inspect the current README, AGENTS.md, contribution policy, and recent changes.
 2. Inspect branches, open PRs, and issues before creating duplicate work.
 3. For a local checkout, inspect `git status --short` and `git branch -vv` before any update.
-4. Prefer `git fetch --all --prune` followed by comparison. **Do not blindly pull, reset, clean, rebase, or discard uncommitted work.**
+4. Prefer `git fetch --all` **without automatic pruning** followed by a read-only comparison. Preserve remote-tracking refs that might be the last accessible evidence of a deleted or rewritten upstream branch; archive them through the owning repository's proven ref-preservation process **before** an intentional prune. **Do not blindly pull, reset, clean, rebase, prune, or discard uncommitted work.**
 5. Identify the baseline build/test commands from current repository instructions, then run only commands supported by the accessible environment.
 6. Record exact commands, commit SHA, result, and timestamp. A CI badge or a README statement is not a fresh test result.
 
