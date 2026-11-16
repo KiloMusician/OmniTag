@@ -32,6 +32,17 @@ Five regression tests cover those behaviors, including 2,000 warning-bearing seg
 
 **Terminology:** the parser preserves unknown glyphs and round-trips NFC input. Non-NFC input is intentionally canonicalized to NFC, so byte-for-byte or codepoint-for-codepoint "losslessness" is **not** claimed for arbitrary input.
 
+## Bounded CLI input (2026-11-16)
+
+The optional `omnitag.py --file <path>` entrypoint now reads at most
+**1,000,001 Unicode characters** before passing input to the existing
+million-character parser cap. The extra character triggers the original
+`INPUT_TOO_LARGE` verdict without loading arbitrary-size files into memory.
+Missing path arguments, missing files and invalid UTF-8 return controlled
+diagnostics instead of raw tracebacks. Three isolated subprocess regressions
+cover these cases. This does **not** turn the proposal into a network parser
+or authorize processing untrusted production data.
+
 ## Measured tokenizer experiment
 
 A bounded synthetic semantic triple was tokenized with exact `tiktoken` encodings on 2026-10-08. The sample is `Msg=SC-ASCENSION-20261008-01`, `Date=2026-10-08`, `Ctx=SC-GSV-INTEGRATION`; no private room or credentials involved.
