@@ -46,16 +46,21 @@ def scan(text: str) -> list[Tag]:
             elif char == "}":
                 depth -= 1
             end += 1
-        if depth == 0 and end < len(text) and text[end] == "]":
+        if depth != 0:
+            # An unclosed outer value owns the remaining text. Treat it
+            # as opaque, especially any well-formed inner tag; otherwise
+            # render_plain would silently strip the inner expression.
+            break
+        if end < len(text) and text[end] == "]":
             if not nested:
                 tags.append(Tag(match.group(1), text[value_start:end - 1],
                                 match.start(), end + 1))
             cursor = end + 1
         else:
-            # A malformed candidate has no known outer extent. Do not
-            # silently drop any of its bytes, and keep searching for a
-            # later independent well-formed tag.
-            cursor = match.start() + 1
+            # Braces closed but closing bracket was absent: this outer
+            # candidate is invalid. Its interior must remain opaque;
+            # resume only AFTER the candidate's closing brace.
+            cursor = end
     return tags
 
 
