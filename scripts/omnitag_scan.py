@@ -7,7 +7,7 @@ Offsets refer to Python Unicode codepoints, not grapheme clusters.
 from dataclasses import dataclass
 import re
 
-_PREFIX = re.compile(r"\\[([A-Za-z][A-Za-z0-9_-]{0,63})⛛\\{")
+_PREFIX = re.compile(r"\[([A-Za-z][A-Za-z0-9_-]{0,63})⛛\{")
 
 
 @dataclass(frozen=True)
