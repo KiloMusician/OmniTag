@@ -61,5 +61,17 @@ class ScanTests(unittest.TestCase):
             self.assertEqual(scan(s), [])
             self.assertEqual(render_plain(s), s)
 
+    def test_unclosed_parent_does_not_strip_inner_annotation(self):
+        s = "[Nest⛛{[State⛛{Observed}]"
+        self.assertEqual(scan(s), [])
+        self.assertEqual(render_plain(s), s)
+
+    def test_missing_parent_bracket_preserves_inner_and_finds_sibling(self):
+        prefix = "[Nest⛛{[State⛛{Observed}]}!"
+        s = prefix + "[Msg⛛{42}]"
+        self.assertEqual([(t.name, t.value) for t in scan(s)], [("Msg", "42")])
+        self.assertEqual(render_plain(s), prefix)
+        self.assertEqual("".join(v for _, v in split(s)), s)
+
 if __name__ == "__main__":
     unittest.main()
