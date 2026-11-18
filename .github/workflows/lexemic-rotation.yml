@@ -1,0 +1,30 @@
+name: Lexemic rotation experiment
+
+on:
+  pull_request:
+    paths:
+      - "experiments/lexemic_rotation.py"
+      - "tests/test_lexemic_rotation.py"
+      - ".github/workflows/lexemic-rotation.yml"
+  push:
+    paths:
+      - "experiments/lexemic_rotation.py"
+      - "tests/test_lexemic_rotation.py"
+      - ".github/workflows/lexemic-rotation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  stdlib-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile and test isolated experiment
+        run: |
+          python -m py_compile experiments/lexemic_rotation.py
+          python -m unittest discover -s tests -p 'test_lexemic_rotation.py' -v
