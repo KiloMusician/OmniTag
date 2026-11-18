@@ -2,9 +2,9 @@
 
 [Msg⛛{ARRIVAL-CONSISTENCY-20261021}] [State⛛{Observed}]
 
-## Verified documentation mismatch
+## Resolved documentation mismatch (2026-10-21 finding)
 
-At the time of review, `README.md` and `AGENTS.md` identify `omnitag.agent-beacon.json` as the machine-readable beacon. The newer `START_HERE.md` instead directs arrivals to `agent-beacon.json`. Use the former documented canonical path unless repository contents and validation establish a migration. This note records a documentation contradiction, not evidence that either file is missing.
+On 2026-10-21, `README.md` and `AGENTS.md` identified `omnitag.agent-beacon.json` as the machine-readable beacon, while the newer `START_HERE.md` directed arrivals to `agent-beacon.json` — a path that returned 404 on `main`. The canonical path was verified to exist in the repository tree, and the entrypoint was corrected by #39 (squash commit `548c5af`, merged 2026-11-09); `START_HERE.md` on current `main` now names `omnitag.agent-beacon.json`. This section is retained as the historical record of the finding, not a live contradiction: use `omnitag.agent-beacon.json` unless repository contents and validation establish a migration.
 
 ## Cold-start verification checklist
 
