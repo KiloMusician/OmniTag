@@ -62,7 +62,7 @@ class SessionState:
     def footer(self):
         snapshot = self.snapshot()
         checksum = hashlib.sha256(canonical(snapshot).encode("utf-8")).hexdigest()[:16]
-        return f"[Msg⛛{{{self.message_count}}}↗️Σ∞] " + canonical({**snapshot, "checksum": checksum})
+        return f"[Msg⛛{{{self.message_count}}}] ↗️Σ∞ " + canonical({**snapshot, "checksum": checksum})
 
 def replay(session_id, messages):
     state = SessionState(session_id)

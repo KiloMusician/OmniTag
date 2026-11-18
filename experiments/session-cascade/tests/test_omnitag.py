@@ -38,5 +38,10 @@ class TestSessionCascade(unittest.TestCase):
         s.ingest("user", "Ξ", {"QM": "Ψ"})
         self.assertIn("Ψ", s.footer())
 
+    def test_footer_tag_is_parseable(self):
+        s = SessionState("demo")
+        s.ingest("user", "hello")
+        self.assertEqual(parse_tags(s.footer())[0], ("Msg", "1"))
+
 if __name__ == "__main__":
     unittest.main()
