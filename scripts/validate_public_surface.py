@@ -57,7 +57,10 @@ def main() -> int:
         raise AssertionError("public beacon must describe a public surface")
 
     observed_states = set(beacon.get("capability_states", []))
-    if observed_states != EXPECTED_CAPABILITY_STATES:
+    if (
+        observed_states != EXPECTED_CAPABILITY_STATES
+        or len(beacon.get("capability_states", [])) != len(EXPECTED_CAPABILITY_STATES)
+    ):
         raise AssertionError(
             f"capability state drift: expected {sorted(EXPECTED_CAPABILITY_STATES)}, "
             f"got {sorted(observed_states)}"
