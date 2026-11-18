@@ -41,3 +41,69 @@ Only the connected public `KiloMusician/OmniTag` repository was inspected for th
 
 ## Handoff
 Reuse the public protocol and existing validation workflow. Do not add an overlapping parser, game engine, or speculative autonomous system. Move executable prototypes to the proper game repository once identified. Keep all claims source-attributed and status-tagged.
+
+
+## Optional evidence mapping to Project 144 canonical export (2026-11-17)
+
+The owning game now has a **candidate**, not a shipped feature:
+[Project-144/project-144 PR #84](https://github.com/Project-144/project-144/pull/84)
+adds a read-only `tools/size_receipt.py` that verifies the exact bytes and
+SHA-256 of the five files already declared by the canonical Windows export's
+`MANIFEST.json`. It emits `p144.size-evidence/1` alongside the existing
+`BUILD_IDENTITY.json`; OmniTag should **reference**, not re-implement,
+that game-owned measurement.
+
+Existing public protocol tags are enough for a handoff. A human can read
+this even if their renderer ignores the tags:
+
+```text
+[Msg⛛{P144-SIZE-RECEIPT-CANDIDATE}]
+[Ctx⛛{BuildSize}]
+[State⛛{Proposed}]
+[Ref⛛{Project-144/project-144#84}]
+[Act⛛{VerifyBundle}]
+[Metric⛛{CanonicalArtifacts:5}]
+The verifier source and synthetic regression tests are committed,
+but no canonical Windows export was measured in this handoff.
+```
+
+A **real byte measurement** on a *test fixture*, **not** a shipped game,
+demonstrates how the more detailed JSON may look. The fixture is the literal
+UTF-8 bytes `project 144\n`:
+
+```json
+{
+  "artifact": "synthetic-test-fixture (not a game executable)",
+  "bytes_on_disk": 12,
+  "sha256": "ea57478c15faf3bc1e7ee77c8aecf9a434f9849be5ea4aefab91a7b96aa843ff",
+  "target_platform": "unspecified fixture",
+  "build_commit_sha": null,
+  "included_dependencies": "unknown",
+  "measured_at_utc": "2026-11-18T01:04:45.087246Z",
+  "measurement_method": "Python hashlib.sha256 over twelve specified UTF-8 bytes",
+  "evidence_status": "observed_fixture_only",
+  "gameplay_verified": false
+}
+```
+
+The candidate game tool's **real export** receipt will supply
+`source_sha`, individual file hashes, `total_bytes_on_disk`,
+`aggregate_sha256` and a timestamp **only after** its canonical bundle is
+read and its existing manifest verified. The aggregate hashes the sorted
+manifest entry JSON; it is **not** a ZIP or compressed binary hash. Missing
+runtime/dependency/VRAM/startup measurements stay `unknown`.
+
+**Unsupported ranking example (explicitly rejected):**
+
+```text
+[Ctx⛛{BuildSize}] [State⛛{Unknown}] [Err⛛{RecordUnverified}]
+Claim: "smallest game ever", "world record", or "under 13 KB"
+without a specified submitted artifact, dependency policy, platform,
+byte-count method, exact hash, and independently verified comparator.
+```
+
+Even a verified 12-byte file cannot establish a playable game or any
+historical record. The public notation adds searchable evidence context;
+it does not confer authority, execute the verifier, or prove the game works.
+
+[State⛛{Proposed}] [Ref⛛{Project-144/project-144#84}]
