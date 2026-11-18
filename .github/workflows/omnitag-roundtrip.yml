@@ -1,0 +1,40 @@
+name: OmniTag roundtrip experiment
+
+on:
+  push:
+    paths:
+      - 'experiments/roundtrip/**'
+      - '.github/workflows/omnitag-roundtrip.yml'
+  pull_request:
+    paths:
+      - 'experiments/roundtrip/**'
+      - '.github/workflows/omnitag-roundtrip.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit cases and adversarial tests
+        working-directory: experiments/roundtrip
+        run: |
+          python omnitag_tests.py
+          python -m unittest -v test_omnitag_contract.py
+      - name: Test unavailable-tokenizer behavior (no pip installs)
+        working-directory: experiments/roundtrip
+        run: |
+          python - <<'PY'
+          import omnitag_bench
+          rows = omnitag_bench.benchmark({})
+          assert len(rows) == 5
+          assert all(r['tokens'] is None for r in rows)
+          assert rows[1]['machine_reconstruction'] is True
+          print('tokenizer unavailable means tokens=null; PASS')
+          PY
