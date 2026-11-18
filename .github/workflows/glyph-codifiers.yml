@@ -1,0 +1,31 @@
+name: Experimental glyph codifiers
+
+on:
+  pull_request:
+    paths:
+      - "experiments/glyph_codifiers.py"
+      - "tests/test_glyph_codifiers.py"
+      - ".github/workflows/glyph-codifiers.yml"
+  push:
+    paths:
+      - "experiments/glyph_codifiers.py"
+      - "tests/test_glyph_codifiers.py"
+      - ".github/workflows/glyph-codifiers.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  stdlib-glyph-registry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile and test registry
+        run: |
+          python -m py_compile experiments/glyph_codifiers.py
+          python -m unittest discover -s tests -p 'test_glyph_codifiers.py' -v
+          python scripts/validate_public_surface.py
