@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
+# macOS Ollama bootstrap (prototype): idempotent Homebrew install, single-server
+# guard, compact model pulls, non-destructive Continue setup.
+# Usage: install_ollama_mac.sh [--dry-run]
+#   MODELS="model:tag ..." overrides the default model list (space-separated).
+#   --dry-run prints the planned actions and exits without changing anything.
 set -euo pipefail
 API=http://127.0.0.1:11434
+MODELS="${MODELS:-qwen2.5-coder:3b llama3.2:3b qwen2.5-coder:7b}"
+if [[ "${1:-}" == "--dry-run" ]]; then
+  echo 'Dry run: no changes will be made.'
+  echo "Would ensure the Homebrew ollama formula, probe $API/api/version,"
+  echo 'and start the brew service only if no server answers.'
+  echo "Would ensure models: $MODELS"
+  echo 'Would create ~/.continue/config.yaml only if absent (existing config preserved).'
+  exit 0
+fi
 command -v brew >/dev/null || { echo 'Install Homebrew first: https://brew.sh'; exit 1; }
 if ! command -v ollama >/dev/null; then brew install ollama; fi
 if curl -fsS "$API/api/version" >/dev/null 2>&1; then
@@ -13,7 +27,8 @@ else
   done
 fi
 curl -fsS "$API/api/version" >/dev/null || { echo 'Ollama API unavailable'; exit 1; }
-for model in qwen2.5-coder:3b llama3.2:3b qwen2.5-coder:7b; do
+# shellcheck disable=SC2086 -- MODELS is intentionally space-separated.
+for model in $MODELS; do
   if ollama list | awk 'NR>1 {print $1}' | grep -Fxq "$model"; then
     echo "Already installed: $model"
   else
