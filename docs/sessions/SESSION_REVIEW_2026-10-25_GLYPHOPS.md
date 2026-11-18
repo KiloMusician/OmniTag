@@ -20,7 +20,7 @@
 | Change | Function |
 | --- | --- |
 | `experiments/glyph_codifiers.py` | unique semantic IDs; source-preserving Unicode overlays; digest-backed restoration |
-| `tests/test_glyph_codifiers.py` | 14 deterministic stdlib unit tests |
+| `tests/test_glyph_codifiers.py` | 16 deterministic stdlib unit tests |
 | `docs/GLYPH_CODIFIERS_EXPERIMENT.md` | provenance, design, compatibility, admissions, non-goals |
 | `.github/workflows/glyph-codifiers.yml` | scoped independent CI |
 | This review | durable handoff |

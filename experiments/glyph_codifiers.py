@@ -95,14 +95,26 @@ def encode(source, entries=REGISTRY):
 def restore(packet, entries=REGISTRY):
     """Validate a transcript packet before reconstructing exact source text."""
     by_id = check_registry(entries)
+    if not isinstance(packet, dict):
+        raise TypeError("packet must be a dict")
     if packet.get("format") != FORMAT or packet.get("interpretation") != "proposed_not_evidence":
         raise ValueError("unsupported packet format or interpretation")
+    parts = packet.get("parts")
+    if not isinstance(parts, list):
+        raise ValueError("packet parts must be a list")
     cursor, fragments = 0, []
-    for part in packet["parts"]:
+    for part in parts:
+        if not isinstance(part, dict):
+            raise ValueError("packet part must be a dict")
+        for key in ("text", "start", "end", "kind"):
+            if key not in part:
+                raise ValueError("packet part missing %r" % key)
         value = part["text"]
         if not isinstance(value, str) or part["start"] != cursor or part["end"] != cursor + len(value):
             raise ValueError("non-contiguous or malformed span")
         if part["kind"] == "glyph":
+            if "id" not in part:
+                raise ValueError("glyph part missing 'id'")
             if part["id"] not in by_id or by_id[part["id"]].surface != value:
                 raise ValueError("codifier identity/surface mismatch")
         elif part["kind"] != "raw":
@@ -110,7 +122,7 @@ def restore(packet, entries=REGISTRY):
         fragments.append(value)
         cursor += len(value)
     source = "".join(fragments)
-    if digest(source) != packet["source_sha256"]:
+    if digest(source) != packet.get("source_sha256"):
         raise ValueError("source digest mismatch")
     return source
 

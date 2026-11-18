@@ -103,6 +103,30 @@ class CodifierTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             module.encode(None)
 
+    def test_restore_rejects_malformed_packets_with_value_error(self):
+        good = {"format": module.FORMAT,
+                "interpretation": "proposed_not_evidence"}
+        malformed = [
+            dict(good),
+            dict(good, parts=None),
+            dict(good, parts="nope"),
+            dict(good, parts=[{}]),
+            dict(good, parts=[{"text": "x"}]),
+            dict(good, parts=[{"text": "x", "start": 0}]),
+            dict(good, parts=[{"text": "x", "start": 0, "end": 1}]),
+            dict(good, parts=[{"kind": "raw", "text": "x", "start": 0, "end": 1}]),
+            dict(good, parts=[{"kind": "glyph", "text": "\u29c9", "start": 0, "end": 1}]),
+            dict(good, parts=[], source_sha256="0" * 64),
+            dict(good, parts=[]),
+        ]
+        for packet in malformed:
+            with self.assertRaises(ValueError, msg=repr(packet)):
+                module.restore(packet)
+
+    def test_restore_rejects_non_dict_packet(self):
+        for packet in (None, "nope", 42):
+            with self.assertRaises(TypeError, msg=repr(packet)):
+                module.restore(packet)
 
 if __name__ == "__main__":
     unittest.main()
